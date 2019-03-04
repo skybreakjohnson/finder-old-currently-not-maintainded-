@@ -7,6 +7,7 @@ sc = SparkContext(conf=conf)
 import os
 import nmap
 from time import sleep
+
 def banner():
     os.system("clear")
     print("""
@@ -125,7 +126,7 @@ def webcam_ips():
 
 nmap_scan()
 
-# major_release.minor_release.patch.build
+# major_release.minor_release.build
 # Ver: 0.0.1-build
 # - nothing useful
 # Ver: 0.0.2-build
