@@ -6,7 +6,6 @@ sc.stop()
 sc = SparkContext(conf=conf)
 import os
 import nmap
-from time import sleep
 
 def banner():
     os.system("clear")
@@ -49,14 +48,11 @@ def nmap_scan():
 # lade csv file in Spark
     x = sc.textFile("nmap.csv")
 
-# nur zum debuggen
-#    print(nm.csv())
-
 # ausgewählter service (Vorübergehend...!)
     if jo == "1":
-        top_10()
+        #top_10()
         microsoft_ips()
-        webcam_ips()
+        #webcam_ips()
     else:
         print("Fuck you im a Pre-Alpha! Bye.")
         exit(1)
@@ -67,11 +63,16 @@ def nmap_scan():
     print("Devices with open port found: ", count)
 
 # Liste der vulnerable versions
-micro = ["microsoft", "6.0", "5.0", "4.0"]
-mysql = []
-mssql = []
-http = []
-ftp = []
+iis = ["microsoft", "6.0", "5.0", "4.0"]
+mysql = ["5.0.51a-24+lenny2", "5.0.45-Debian_1ubuntu3.1-log", "5.5.9", "5.5",
+         "5.4", "5.3", "0.9.2", "2.4.6", "5.0.45-community-nt",
+         "5.1.22-rc-community"] 
+mssql = ["MSSQL 2000", "MSDE", "8.00.194", "8.00.384", "8.00.534", "8.00.760",
+         "8.00.2039", "9.00.1399.06", "9.00.2047.00", "9.00.3042.00"]
+http = ["WRT160n" ]
+ftp = ["1.3.2rc3", "1.3.3b", "1.2", "1.3.0", "1.3.2rc3", "1.3", "1.3.3b",
+       "3.2.0.0.258", "3.4.0.0.348", "3.4.0.0.348", "3.4.0". "3.3.0", "3.2", 
+       "wu-2.4", "wu-2.6.0", "23c8", "WebSTAR", "1.3.3c", "1.3.5", "v2.3.4"]
 
 def top_10():
     rdd = sc\
@@ -96,12 +97,12 @@ def microsoft_ips():
     .cache()
     x = rdd\
     .filter(lambda x:\
-    micro[0] in x[12]\
-    and micro[1] in x[10]\
-    or micro[0] in x[12]\
-    and mircro[2] in x[10]\
-    or micro[0] in x[12]\
-    and micro[3] in x[10])\
+    iis[0] in x[12]\
+    and iis[1] in x[10]\
+    or iis[0] in x[12]\
+    and iis[2] in x[10]\
+    or iis[0] in x[12]\
+    and iis[3] in x[10])\
     .map(lambda x: x[0])\
     .collect()
     print("*"*10)
