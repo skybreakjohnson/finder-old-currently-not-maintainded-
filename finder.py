@@ -123,7 +123,7 @@ def webcam_ips():
     print("[+] Webcam found: ", x)
 
 # alle IP's in einer Liste    
-#ips = x.map(lambda x: x.split(";")).map(lambda x: x[0]).collect()
+# ips = x.map(lambda x: x.split(";")).map(lambda x: x[0]).collect()
 
 nmap_scan()
 
