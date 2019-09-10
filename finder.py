@@ -135,7 +135,3 @@ nmap_scan()
 # - add menu
 # - make list for vulnerable versions
 # To fix:
-# To do:
-# - add Masscan
-# - add Metasploit
-# - graphical results ( Matlibplot :)
