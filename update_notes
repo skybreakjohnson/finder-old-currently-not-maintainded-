@@ -1,0 +1,12 @@
+# major_release.minor_release.build
+ Ver: 0.0.1-build
+ - nothing useful
+ Ver: 0.0.2-build
+ - filter is working
+ - add menu
+ - make list for vulnerable versions
+ Ver: 0.0.3-build
+ - rewritten
+ - use pandas instead of spark 
+ - mssql_scan working
+ - mysql_scan working
