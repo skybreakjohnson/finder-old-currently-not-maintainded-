@@ -24,30 +24,26 @@ class NmapArguments():
     NSE_SCAN = ' -sC --script=ftp-anon'
     FTP_ANON = 'ftp-anon'
 
+# define basic scan
+def basic_scan():
+    global nmap_basic_scan
+    nmap_basic_scan = subprocess.Popen(NmapArguments().BASIC_INFORMATIONS + NmapArguments().SPOOF + NmapArguments().TIME_PERFORMANCE + NmapArguments().DEBUG + NmapArguments().VERSION_DETECTION + NmapArguments().BLACKLIST, shell=True,  universal_newlines=True).wait()
 
-    def __run(self, nmap_string):
-        return subprocess.Popen(nmap_string, shell=True,  universal_newlines=True).wait()
+# define basic scan for output filter
+def basic_scan_to_pipe():
+    global nmap_basic_scan
+    nmap_basic_scan = subprocess.Popen(NmapArguments().BASIC_INFORMATIONS + NmapArguments().SPOOF + NmapArguments().TIME_PERFORMANCE + NmapArguments().BLACKLIST + NmapArguments().NSE_SCAN, stdout=subprocess.PIPE, shell=True,  universal_newlines=True)
 
-    # define basic scan
-    def basic_scan(self):
-        return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.TIME_PERFORMANCE + self.DEBUG + self.VERSION_DETECTION + self.BLACKLIST)
-
-    # define basic scan for output filter
-    def basic_scan_to_pipe(self):
-        return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.TIME_PERFORMANCE + self.BLACKLIST + self.NSE_SCAN)
-
-    # define version detection scan
-    def version_detection_scan(self):
-        return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.VERSION_DETECTION + self.TIME_PERFORMANCE + self.BLACKLIST + self.NSE_SCAN)
-
-
-
+# define version detection scan
+def version_detection_scan():
+    global version_detection
+    version_detection = Popen(NmapArguments().BASIC_INFORMATIONS + NmapArguments().SPOOF + NmapArguments().VERSION_DETECTION + NmapArguments().TIME_PERFORMANCE + NmapArguments().BLACKLIST + NmapArguments().NSE_SCAN, shell=True, universal_newlines=True).wait()
 
 # define service filters   
-def filter_ftp_output(pushed):   
+def filter_ftp_output():   
     # filter output
     lines = []
-    for line in pushed.stdout:
+    for line in nmap_basic_scan.stdout:
         lines.append(line.strip('\n'))
         if 'report' in line:
             #out = sys.stdout.write(line[20:])
@@ -72,20 +68,19 @@ def filter_ftp_output(pushed):
             pass
 
 # main
-m_obj = NmapArguments()
 if len(argv) == 4:
     if argv[1] == '1':
         #NmapArguments.NSE_SCAN+NmapArguments.FTP_ANON
         #print(NmapArguments.NSE_SCAN)
-        a = m_obj.basic_scan_to_pipe()
-        filter_ftp_output(a)
+        basic_scan_to_pipe()
+        filter_ftp_output()
     elif argv[1] == '2':
         if argv[2] == '21':
             NmapArguments.NSE_SCAN + 'ftp-anon'
-            b = m_obj.basic_scan_to_pipe()
-            filter_ftp_output(b)
+            basic_scan_to_pipe()
+            filter_ftp_output()
         else:
-            m_obj.service_detection_scan()
+            service_detection_scan()
     else:
         usage()
 else:
