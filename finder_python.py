@@ -24,25 +24,20 @@ class NmapArguments():
     NSE_SCAN = ' -sC --script=ftp-anon'
     FTP_ANON = 'ftp-anon'
 
-    def __init__(self) -> None:
-        pass
 
     def __run(self, nmap_string):
         return subprocess.Popen(nmap_string, shell=True,  universal_newlines=True).wait()
 
     # define basic scan
     def basic_scan(self):
-        global nmap_basic_scan
-        self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.TIME_PERFORMANCE + self.DEBUG + self.VERSION_DETECTION + self.BLACKLIST)
+        return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.TIME_PERFORMANCE + self.DEBUG + self.VERSION_DETECTION + self.BLACKLIST)
 
     # define basic scan for output filter
     def basic_scan_to_pipe(self):
-        global nmap_basic_scan
         return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.TIME_PERFORMANCE + self.BLACKLIST + self.NSE_SCAN)
 
     # define version detection scan
     def version_detection_scan(self):
-        global version_detection
         return self.__run(self.BASIC_INFORMATIONS + self.SPOOF + self.VERSION_DETECTION + self.TIME_PERFORMANCE + self.BLACKLIST + self.NSE_SCAN)
 
 
