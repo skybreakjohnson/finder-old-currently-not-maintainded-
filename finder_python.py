@@ -28,7 +28,7 @@ class NmapArguments():
         pass
 
     def __run(self, nmap_string):
-        subprocess.Popen(nmap_string, shell=True,  universal_newlines=True).wait()
+        return subprocess.Popen(nmap_string, shell=True,  universal_newlines=True).wait()
 
     # define basic scan
     def basic_scan(self):
@@ -49,10 +49,10 @@ class NmapArguments():
 
 
 # define service filters   
-def filter_ftp_output():   
+def filter_ftp_output(pushed):   
     # filter output
     lines = []
-    for line in nmap_basic_scan.stdout:
+    for line in pushed.stdout:
         lines.append(line.strip('\n'))
         if 'report' in line:
             #out = sys.stdout.write(line[20:])
@@ -82,13 +82,13 @@ if len(argv) == 4:
     if argv[1] == '1':
         #NmapArguments.NSE_SCAN+NmapArguments.FTP_ANON
         #print(NmapArguments.NSE_SCAN)
-        m_obj.basic_scan_to_pipe()
-        filter_ftp_output()
+        a = m_obj.basic_scan_to_pipe()
+        filter_ftp_output(a)
     elif argv[1] == '2':
         if argv[2] == '21':
             NmapArguments.NSE_SCAN + 'ftp-anon'
-            m_obj.basic_scan_to_pipe()
-            filter_ftp_output()
+            b = m_obj.basic_scan_to_pipe()
+            filter_ftp_output(b)
         else:
             m_obj.service_detection_scan()
     else:
