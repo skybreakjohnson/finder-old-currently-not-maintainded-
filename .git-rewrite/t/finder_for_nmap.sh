@@ -5,7 +5,7 @@
 # | Script for fast large scale vulnerability scanning with Nmap |
 # | *************************************************************|
 # *--------------------------------------------------------------*
-# Version: 0.1.1dev
+# Version: 0.1dev
 # Large scale discovery and vulnerability scanning 
 # Used tools: Nmap, Zmap, Masscan, Whatweb, Wpscan, Metasploit
 # +++ work in progress +++
@@ -45,58 +45,44 @@ nmap_only_scan () {
 	echo -e "\033[1;37m[i] \033[1;37mOk, scanning ${how_many} hosts on port ${ports} with Nmap...\033[0m";
 
 	# large scale nmap scan
-	# check if a blacklist is available
-	if [ -f 'blacklist.txt' ]; then 
-	    sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=10 --max-retries=1 -p ${ports} -iR ${how_many} --excludefile=${blacklist} -n --open -oA og > /dev/null;
-	else 
-        # scan without a blacklist
-            echo -e "\033[1;31m[!] No blacklist is used!\033[0m" && sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=10 --max-retries=1 -p ${ports} -iR ${how_many} -n --open -oA og > /dev/null;
-	fi
+	sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=10 --max-retries=1 -p ${ports} -iR ${how_many} --excludefile=${blacklist} -n --open -oA og > /dev/null;
 
 	# write ip's to file
-	while [ -f hosts.lst ]; do
-		rm hosts.lst; done
-		touch hosts.lst;
+	while [ -f ${file} ]; do
+		rm ${file}; done
+		touch $file;
 	for i in $(cat og.gnmap |grep -iE "(status)"); do
 		echo $i | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' >> $file; done;
-		echo -e "\033[1;37m[i] File with hosts:\033[0m hosts.lst";
+		echo -e "\033[1;37m[i] File with hosts:\033[0m $file";
 
-	# count hosts
-	for hosts in $(cat og.gnmap | grep -iE "(Ports:)" | uniq | wc -l);
-	do echo -e "\033[1;92m[+] Hosts: \033[0m $hosts";
+	# count hosts with services found
+	for i in $(cat og.gnmap | grep -iE "(Ports:)" | uniq | wc -l);
+	do echo -e "\033[1;92m[+] Hosts: \033[0m $i";
 	
 	# show scan time
 	echo -e "\033[1;37m[i] Time:\033[0m " $(cat og.gnmap | tail -n 1 | cut -f11- -d ' ')
 
 	# scan info
-	echo -e "\033[1;37m[i] \033[1;37mOk, scanning ${hosts} hosts on port ${ports} for ${service} with Nmap...\033[0m";
+	echo -e "\033[1;37m[i] \033[1;37mOk, scanning ${a} hosts on port ${ports} for ${service} with Nmap...\033[0m";
 	done;
 
 	# service detection scan
 	sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=30 -p ${ports} -sV --version-intensity=4 -sS -iL ${file} -n --open -oA og > /dev/null;
 
 	# grep services
-	if cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d'; then 
+	if cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d'; 
 	
-	# show hosts with services found
-	hosts=$(echo -e "\n\033[1;92m[+] ${service} found:\033[0m " $(cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d'| grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | uniq)); echo $hosts;
-        fi;	
+	# show hosts
+	then hosts=$(echo -e "\n\033[1;92m[+] ${service} found:\033[0m " $(cat og.gnmap | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | uniq)); echo $hosts; fi
 	
 	# count hosts with services found
-	if i=$(cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d'| grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | uniq | wc -w);
-	then echo -e "\033[1;92m[+] Hosts with services found: \033[0m $i";
+	if i=$(cat $file | wc -l);
+	then echo -e "\033[1;92m[+] Hosts: \033[0m $i";
 	fi;
 
 	# show scan time
 	echo -e "\033[1;37m[i] Time:\033[0m " $(cat og.gnmap | tail -n 1 | cut -f11- -d ' ');
 
-	# write ip's with found services to file
-	while [ -f $file ]; do
-	    rm $file; done
-	touch $file;
-	for i in $(cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d');do 
-	    echo $i | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | uniq >> $file; done;
-	echo -e "\033[1;37m[i] File with service hosts:\033[0m $file";
 }
 
 # version detection scan after zmap
@@ -122,6 +108,21 @@ version_detection () {
 	# show scan time
 	echo -e "\033[1;37m[i] Time:\033[0m " $(cat og.gnmap | tail -n 1 | cut -f11- -d ' ')
 }
+
+ip_to_file () {
+
+	while [ -f ${file} ]; do
+		rm ${file}; done;
+	touch $file;
+	for i in $(cat og.gnmap |grep -iE "(${service})"); do
+		echo $i | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' >> $file; done;
+	
+	cat $file | uniq > finder_uniq.lst;
+	cat finder_uniq.lst > $file	
+
+	echo -e "\033[1;37m[i] File with hosts:\033[0m $file";
+}
+
 
 # ftp_scan
 ftp_scan () { 
@@ -179,24 +180,18 @@ metasploit () {
 	echo -e "\033[1;37m\n[i] Import hosts to Metasploit? \033[0m"
 	read msf;
 	if [ "${msf}" == 'yes' ]; then
-	    # check if msfb is running, initialize if not
-            if [[ $(sudo msfdb status |grep dead) ]];then
-                echo -e "\033[1;31m[!] Msfdb not running. \033[0m\n\033[1;37m[i] Msfdb init... \n\033[0m"
-		sudo msfdb init;
-		echo -e "\033[1;37m[i] Starting msfconsole... \033[0m";
-		echo -e "workspace -a finder\nworkspace finder\ndb_import og.xml\nservices -S $service" > test.rc;
-		msfconsole -q -x 'resource test.rc';
-            else
-		echo -e "\033[1;37m[i] Starting msfconsole... \033[0m";
+		echo -e "\033[1;37m[i] Starting msfconsole... \n\033[0m"
 		echo -e "workspace -a finder\nworkspace finder\ndb_import og.xml\nservices -S $service" > test.rc; 
 		msfconsole -q -x 'resource test.rc';
-	    fi
 	elif [[ "${msf}" -eq 0 ]]; then
 		exit
 	else
 		exit
 	fi
-}       
+}
+
+# to do:
+# country, ip range, random, costum
 
 user_input () {
 
@@ -230,18 +225,16 @@ user_input () {
 service_input () {
 	
 	if [ "${ports}" -eq 21 -a "${search_for_vulns}" == "yes" ]; then
-	    echo -e "(1) Anonymous FTP login  (2) FTP Vulns"
-	    read ftp
-	        if [ "${ftp}" -eq 1 ]; then
-		    ftp_scan;
-		    ip_to_file
-		    metasploit
+		echo -e "(1) Anonymous FTP login  (2) FTP Vulns"
+		read ftp
+		if [ "${ftp}" -eq 1 ]; then
+			echo 'nope'
+			ftp_scan;
+			ip_to_file
+			metasploit
 		elif [ "${ftp}" -eq 2 ]; then
-		    echo "Suck dick cyka"
-	    fi
-	else 
-	    echo -e "\033[1;37m[i] No vulnerability search available
-for this scan. \033[0m"
+			echo "Suck dick cyka"
+		fi
 	fi
 }
 
@@ -252,6 +245,7 @@ nmap_scan () {
 	user_input
 	service_input
 	nmap_only_scan
+	ip_to_file
 	metasploit
 }
 
@@ -288,3 +282,4 @@ main
 
 
 
+#for i in $(cat og.gnmap) |grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'; done > nmap.lst
