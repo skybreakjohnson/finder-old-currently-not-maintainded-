@@ -29,6 +29,17 @@ nmap -V | head -n 1;
 echo
 }
 
+# create directory for scan results
+change_directory () {
+    file_path=$HOME'/finder_scans'
+    if [ -d $file_path ]; then
+        cd $file_path
+    else
+        mkdir $file_path
+	cd $file_path
+    fi
+}
+
 # define some options
 blacklist='/home/betaperson/vm/192.168.178.149:8000/blacklists/blacklist.txt'
 packets_per_second=40
@@ -55,10 +66,10 @@ nmap_only_scan () {
 
 	# write ip's to file
 	while [ -f hosts.lst ]; do
-		rm hosts.lst; done
-		touch hosts.lst;
+	    rm hosts.lst; done
+	touch hosts.lst;
 	for i in $(cat og.gnmap |grep -iE "(status)"); do
-		echo $i | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' >> $file; done;
+		echo $i | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' >> hosts.lst; done;
 		echo -e "\033[1;37m[i] File with hosts:\033[0m hosts.lst";
 
 	# count hosts
@@ -73,7 +84,7 @@ nmap_only_scan () {
 	done;
 
 	# service detection scan
-	sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=30 -p ${ports} -sV --version-intensity=4 -sS -iL ${file} -n --open -oA og > /dev/null;
+	sudo nmap -D RND,ME,RND,RND,RND,RND -Pn -T5 --host-timeout=30 -p ${ports} -sV --version-intensity=4 -sS -iL hosts.lst -n --open -oA og > /dev/null;
 
 	# grep services
 	if cat og.gnmap | grep -iE "(${service})" | sed '/Nmap\|Up/d'; then 
@@ -271,6 +282,7 @@ main () {
 	
 	# define which scan to use
 	pure_art
+	change_directory
 	echo -e "\033[1;37m(1)Nmap or (2)Zmap: \033[0m"
 	read nmap_or_zmap
 	if [ "${nmap_or_zmap}" -eq 1 ]; then
