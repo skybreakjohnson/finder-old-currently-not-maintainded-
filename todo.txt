@@ -1,0 +1,9 @@
+
+- add support for more linux distributions ( arch, fedora, etc. )
+
+FIX:
+
+- host.lst not working ( fix hosts count)
+- scan Time output
+- vulnerability search
+- fix ftp scan ( "ftp found: " output)
